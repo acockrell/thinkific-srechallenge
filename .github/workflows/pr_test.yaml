@@ -1,8 +1,12 @@
+# Fast test workflow using SQLite backend for quick feedback on pull requests
+# This provides rapid test results while the Postgres workflow validates database compatibility
 name: Test
 
+# Trigger on pull requests to catch issues before merging
 on:
   pull_request:
 
+# Prevent multiple workflow runs for the same PR/branch to save resources
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -12,17 +16,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repository code
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Install uv package manager for Python dependency management
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
+      # Install Python 3.12 as required by the project
       - name: Set up Python
         run: uv python install 3.12
 
+      # Install project dependencies including dev dependencies (pytest)
       - name: Install dependencies
         run: uv sync --dev
 
+      # Run the test suite using the default SQLite in-memory backend
+      # This is faster than Postgres and suitable for most unit tests
       - name: Run tests
         run: uv run python -m pytest -v
