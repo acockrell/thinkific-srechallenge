@@ -1,0 +1,56 @@
+# Test workflow that runs the DumbKV application tests against a PostgreSQL database
+# This ensures compatibility with production-like database environments
+name: Test with Postgres
+
+# Trigger on pull requests to validate database compatibility before merging
+on:
+  pull_request:
+
+# Prevent multiple workflow runs for the same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-postgres:
+    runs-on: ubuntu-latest
+
+    # PostgreSQL service container for testing
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        # Health check configuration to ensure Postgres is ready before tests run
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Map container port 5432 to host port 5432
+          - 5432:5432
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install uv package manager for Python dependency management
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      # Install Python 3.12 as required by the project
+      - name: Set up Python
+        run: uv python install 3.12
+
+      # Install project dependencies including dev dependencies (pytest)
+      - name: Install dependencies
+        run: uv sync --dev
+
+      # Run the test suite against PostgreSQL backend
+      # Uses the --database-location flag to specify Postgres connection string
+      - name: Run tests with Postgres
+        run: uv run python -m pytest -v --database-location=postgres://postgres:postgres@localhost/postgres
