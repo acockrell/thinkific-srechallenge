@@ -29,6 +29,7 @@ RUN uv sync --frozen
 # Copy application source code after dependencies for optimal caching
 # This layer only rebuilds when source code changes
 COPY main.py dumbkv.py logging.yaml ./
+COPY ui/ ./ui/
 
 # Set up default environment variables for SQLite backend
 # Can be overridden at runtime for different database configurations
