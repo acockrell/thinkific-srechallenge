@@ -1,0 +1,18 @@
+# Persistent Volume Claim for DumbKV SQLite database storage
+# Uses EFS storage class for shared, persistent storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dumbkv-pvc
+  labels:
+    app: dumbkv
+spec:
+  # EFS storage class as specified in requirements - unable to test in local K8S cluster.
+  storageClassName: efs
+  accessModes:
+    # ReadWriteOnce is sufficient for single replica SQLite usage
+    - ReadWriteOnce
+  resources:
+    requests:
+      # 1Gi should be sufficient for SQLite database
+      storage: 1Gi

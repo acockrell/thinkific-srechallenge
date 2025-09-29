@@ -1,0 +1,17 @@
+# Service to expose DumbKV application within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: dumbkv-service
+  labels:
+    app: dumbkv
+spec:
+  # ClusterIP service for internal cluster access
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: dumbkv
