@@ -1,0 +1,32 @@
+# Ingress for DumbKV application with TLS termination
+# Exposes the service at dumbkv.example.com with Let's Encrypt certificates
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dumbkv-ingress
+  labels:
+    app: dumbkv
+  annotations:
+    # Use cert-manager for automatic TLS certificate management
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    # Additional annotations for common ingress controllers
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  # TLS configuration with automatic certificate generation
+  tls:
+  - hosts:
+    - dumbkv.example.com
+    secretName: dumbkv-tls
+  rules:
+  - host: dumbkv.example.com
+    http:
+      paths:
+      # Service available on root path as specified
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: dumbkv-service
+            port:
+              number: 80

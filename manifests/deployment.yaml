@@ -1,0 +1,69 @@
+# Deployment for DumbKV application using SQLite backend
+# Configured for single replica to prevent database conflicts
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dumbkv
+  labels:
+    app: dumbkv
+spec:
+  # Single replica to prevent multiple instances accessing SQLite simultaneously
+  replicas: 1
+  # Recreate strategy prevents multiple pods running concurrently
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: dumbkv
+  template:
+    metadata:
+      labels:
+        app: dumbkv
+    spec:
+      containers:
+      - name: dumbkv
+        # Update this to your actual image once built and pushed
+        image: dumbkv:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        # Configure for SQLite backend with persistent storage
+        - name: DATABASE_LOCATION
+          value: "/data/dumbkvstore/dumbkv.db"
+        - name: DATABASE_TYPE
+          value: "sqlite"
+        # Health check configuration
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        # Resource limits for stable operation
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        # Mount persistent volume for SQLite database
+        volumeMounts:
+        - name: dumbkv-storage
+          mountPath: /data/dumbkvstore
+      volumes:
+      - name: dumbkv-storage
+        persistentVolumeClaim:
+          claimName: dumbkv-pvc
