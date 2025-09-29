@@ -1,5 +1,5 @@
-# Deployment for DumbKV application using SQLite backend
-# Configured for single replica to prevent database conflicts
+# Deployment for DumbKV application using PostgreSQL backend
+# Can now scale to multiple replicas with shared PostgreSQL database
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,9 +7,9 @@ metadata:
   labels:
     app: dumbkv
 spec:
-  # Single replica to prevent multiple instances accessing SQLite simultaneously
+  # Single replica deployment for simplicity - can be expanded if a rolling deployment strategy is preferred.
   replicas: 1
-  # Recreate strategy prevents multiple pods running concurrently
+  # Recreate strategy for simple deployments
   strategy:
     type: Recreate
   selector:
@@ -29,11 +29,11 @@ spec:
         - containerPort: 8000
           name: http
         env:
-        # Configure for SQLite backend with persistent storage
+        # Configure for PostgreSQL backend
         - name: DATABASE_LOCATION
-          value: "/data/dumbkvstore/dumbkv.db"
+          value: "postgresql://dumbkv_user:dumbkv_password@postgres-service:5432/dumbkv"
         - name: DATABASE_TYPE
-          value: "sqlite"
+          value: "postgres"
         # Health check configuration
         livenessProbe:
           httpGet:
@@ -59,11 +59,4 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "500m"
-        # Mount persistent volume for SQLite database
-        volumeMounts:
-        - name: dumbkv-storage
-          mountPath: /data/dumbkvstore
-      volumes:
-      - name: dumbkv-storage
-        persistentVolumeClaim:
-          claimName: dumbkv-pvc
+        # No volume mounts needed for PostgreSQL backend

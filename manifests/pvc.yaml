@@ -7,7 +7,7 @@ metadata:
   labels:
     app: dumbkv
 spec:
-  # EFS storage class as specified in requirements - unable to test in local K8S cluster.
+  # EFS storage class as specified in requirements - unable to test in local K8S cluster.  Comment out before applying locally.
   storageClassName: efs
   accessModes:
     # ReadWriteOnce is sufficient for single replica SQLite usage
