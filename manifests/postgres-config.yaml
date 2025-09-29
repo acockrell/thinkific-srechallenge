@@ -1,0 +1,22 @@
+# ConfigMap for PostgreSQL configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: "dumbkv"
+  POSTGRES_USER: "dumbkv_user"
+---
+# Secret for PostgreSQL password
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  labels:
+    app: postgres
+type: Opaque
+data:
+  # Base64 encoded password "dumbkv_password"
+  POSTGRES_PASSWORD: ZHVtYmt2X3Bhc3N3b3Jk
