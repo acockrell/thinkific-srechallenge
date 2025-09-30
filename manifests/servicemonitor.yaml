@@ -1,0 +1,19 @@
+# ServiceMonitor for DumbKV application
+# Configures Prometheus Operator to scrape metrics from the application
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dumbkv-metrics
+  labels:
+    app: dumbkv
+spec:
+  # Select the service to monitor based on labels
+  selector:
+    matchLabels:
+      app: dumbkv
+  # Define the endpoints to scrape
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
