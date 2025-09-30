@@ -12,9 +12,7 @@ This document describes the recommended Service Level Objectives for the DumbKV 
 
 **Prometheus Query:**
 ```promql
-sum(rate(http_requests_total{status=~"2xx|3xx"}[5m]))
-/
-sum(rate(http_requests_total[5m])) >= 0.99
+sum(rate(http_requests_total{status=~"2xx|3xx"}[5m])) / sum(rate(http_requests_total[5m])) >= 0.99
 ```
 
 ## Latency SLO
@@ -40,9 +38,7 @@ histogram_quantile(0.95, sum(rate(http_request_duration_highr_seconds_bucket[5m]
 
 **Prometheus Query:**
 ```promql
-sum(rate(http_requests_total{status="5xx"}[5m]))
-/
-sum(rate(http_requests_total[5m])) < 0.01
+sum(rate(http_requests_total{status="5xx"}[5m])) / sum(rate(http_requests_total[5m])) < 0.01
 ```
 
 ## Additional Considerations
